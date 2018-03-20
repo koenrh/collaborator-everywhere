@@ -257,7 +257,6 @@ class Injector implements IProxyListener {
     }
 
     public byte[] injectPayloads(byte[] request, Integer requestCode) {
-
         //request = Utilities.replaceRequestLine(request, "GET @"+collabId + "/"+collabId.split("[.]")[0] + " HTTP/1.1");
         //request = Utilities.addOrReplaceHeader(request, "Referer", "http://portswigger-labs.net/redirect.php?url=https://portswigger-labs.net/"+collabId);
 
@@ -265,8 +264,8 @@ class Injector implements IProxyListener {
 
         for (String[] injection: injectionPoints) {
             String payload = injection[2].replace("%s", collab.generateCollabId(requestCode, injection[1]));
-	    // replace %h with corresponding Host header (same as with %s for Collaborator)
-	    payload = payload.replace("%h", Utilities.getHeader(request, "Host"));
+            // replace %h with corresponding Host header (same as with %s for Collaborator)
+            payload = payload.replace("%h", Utilities.getHeader(request, "Host"));
             switch ( injection[0] ){
                 case "param":
                     IParameter param = Utilities.helpers.buildParameter(injection[1], payload, IParameter.PARAM_URL);
@@ -280,7 +279,6 @@ class Injector implements IProxyListener {
                 default:
                     Utilities.out("Unrecognised injection type: " + injection[0]);
             }
-            
         }
 
         return request;
@@ -307,8 +305,5 @@ class Injector implements IProxyListener {
         Integer requestCode = collab.addRequest(req);
 
         messageInfo.setRequest(injectPayloads(messageInfo.getRequest(), requestCode));
-
-
     }
-
 }
