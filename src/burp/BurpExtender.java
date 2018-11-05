@@ -12,7 +12,6 @@ public class BurpExtender implements IBurpExtender {
     // provides potentially useful info but increases memory usage
     static final boolean SAVE_RESPONSES = false;
 
-
     @Override
     public void registerExtenderCallbacks(final IBurpExtenderCallbacks callbacks) {
         new Utilities(callbacks);
@@ -70,11 +69,10 @@ class Monitor implements Runnable, IExtensionStateListener {
         String severity = "High";
         String ipAddress = interaction.getProperty("client_ip");
 
-        /*
-        if(ipAddress.startsWith("74.125.")){
-            return;
+        if(ipAddress.startsWith("95.101.")) {
+          Utilities.out("--> Akamai --> ignore");
+          return;
         }
-        */
 
         String rawDetail = interaction.getProperty("request");
         if (rawDetail == null) {
@@ -266,6 +264,7 @@ class Injector implements IProxyListener {
             String payload = injection[2].replace("%s", collab.generateCollabId(requestCode, injection[1]));
             // replace %h with corresponding Host header (same as with %s for Collaborator)
             payload = payload.replace("%h", Utilities.getHeader(request, "Host"));
+
             switch ( injection[0] ){
                 case "param":
                     IParameter param = Utilities.helpers.buildParameter(injection[1], payload, IParameter.PARAM_URL);
@@ -294,13 +293,13 @@ class Injector implements IProxyListener {
         }
 
         IHttpRequestResponse messageInfo = proxyMessage.getMessageInfo();
-	
-	// only tamper with requests that are in scope
-	IRequestInfo reqinfo = Utilities.helpers.analyzeRequest(messageInfo.getHttpService(), messageInfo.getRequest());
-	
-	if (!Utilities.callbacks.isInScope(reqinfo.getUrl())) {
-		return;
-	}
+
+        // only tamper with requests that are in scope
+        IRequestInfo reqinfo = Utilities.helpers.analyzeRequest(messageInfo.getHttpService(), messageInfo.getRequest());
+
+        if (!Utilities.callbacks.isInScope(reqinfo.getUrl())) {
+          return;
+        }
 
         // don't tamper with requests already heading to the collaborator
         if (messageInfo.getHttpService().getHost().endsWith(collab.getLocation())) {
